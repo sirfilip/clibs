@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
 
 typedef struct {
     size_t capacity;
@@ -33,23 +34,21 @@ Dict *dict_new(size_t capacity) {
     return dict;
 }
 
-// TODO: search for space gaps
-// TODO check the mallocs for errors
 int dict_insert(Dict *dict, const char *key, const char *value) {
     assert(dict->capacity > dict->size + 1 && "dict overflow");
 
-    for (size_t i=0; i < dict->capacity; i++) {
+    for (size_t i=0; i < dict->size; i++) {
         if (dict->keys[i] != NULL) {
             continue;
         }
         size_t key_len = strlen(key);
         dict->keys[i] = (char *)malloc(sizeof(char) * key_len + 1);
-        memcpy(dict->keys[i], key, key_len);
+        memmove(dict->keys[i], key, key_len);
         dict->keys[i][key_len] = '\0';
 
         size_t value_len  = strlen(value);
         dict->values[i] = (char *)malloc(sizeof(char) * value_len + 1);
-        memcpy(dict->values[i], value, value_len);
+        memmove(dict->values[i], value, value_len);
         dict->values[i][value_len] = '\0';
         dict->len++;
         return 0;
@@ -57,12 +56,12 @@ int dict_insert(Dict *dict, const char *key, const char *value) {
 
     size_t key_len = strlen(key);
     dict->keys[dict->size] = (char *)malloc(sizeof(char) * key_len + 1);
-    memcpy(dict->keys[dict->size], key, key_len);
+    memmove(dict->keys[dict->size], key, key_len);
     dict->keys[dict->size][key_len] = '\0';
 
     size_t value_len  = strlen(value);
     dict->values[dict->size] = (char *)malloc(sizeof(char) * value_len + 1);
-    memcpy(dict->values[dict->size], value, value_len);
+    memmove(dict->values[dict->size], value, value_len);
     dict->values[dict->size][value_len] = '\0';
     dict->size++;
     dict->len++;
@@ -99,6 +98,20 @@ int dict_delete(Dict *dict, const char *key) {
     }
 
     return 0;
+}
+
+void dict_free(Dict *dict) {
+    for (size_t i=0; i<dict->capacity; i++) {
+        if (dict->keys != NULL) {
+            free(dict->keys[i]);
+        }
+        if (dict->values != NULL) {
+            free(dict->values[i]);
+        }
+    }
+    free(dict->keys);
+    free(dict->values);
+    free(dict);
 }
 
 
