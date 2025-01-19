@@ -2,20 +2,22 @@
 #define _SV_H
 
 #include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
 
 typedef struct {
     const char *data;
     size_t len;
 } SV;
 
-SV sv_from_cstring(const char *cstring, size_t len) {
+SV sv_from_cstring(const char *cstring) {
     return (SV) {
         .data = cstring,
-        .len = len
+        .len = strlen(cstring)
     };
 }
 
-int sv_has_prefix(SV sv, SV prefix) {
+bool sv_has_prefix(SV sv, SV prefix) {
     if (sv.len < prefix.len) {
         return 0;
     }
@@ -27,7 +29,7 @@ int sv_has_prefix(SV sv, SV prefix) {
     return 1;
 }
 
-int sv_has_suffix(SV sv, SV suffix) {
+bool sv_has_suffix(SV sv, SV suffix) {
     if (sv.len < suffix.len) {
         return 0;
     }
@@ -40,7 +42,7 @@ int sv_has_suffix(SV sv, SV suffix) {
 }
 
 void sv_trim_prefix(SV *sv, SV prefix) {
-    if (sv_has_prefix(*sv, prefix) == 0) {
+    if (!sv_has_prefix(*sv, prefix)) {
         return;
     }
     sv->data += prefix.len;
@@ -48,7 +50,7 @@ void sv_trim_prefix(SV *sv, SV prefix) {
 }
 
 void sv_trim_suffix(SV *sv, SV suffix) {
-    if (sv_has_suffix(*sv, suffix) == 0) {
+    if (!sv_has_suffix(*sv, suffix)) {
         return;
     }
     sv->len -= suffix.len;
@@ -82,7 +84,7 @@ void sv_strip_suffix(SV *sv, char suffix) {
     sv->len -= count;
 }
 
-int sv_equal(SV sv, SV other) {
+bool sv_equal(SV sv, SV other) {
     if (sv.len != other.len) {
         return 0;
     }
